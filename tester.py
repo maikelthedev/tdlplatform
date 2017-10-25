@@ -179,8 +179,6 @@ def testme():
         print("Can't test you while the tests are less than 20")
         print("Currently the page has only", len(tests), "tests")
         return
-
-    # Think about what would happen when the tests have lss than 20, you need to block the test from happening
     selected = random.sample(tests, 20)
     for test in selected:
         print()
@@ -207,10 +205,68 @@ def testme():
         {"$push": {"scores": {"score": totals, "date": now}}}
     )
     print()
-    # Notice here that the len is always 20 now, so you need to change that.
-    print("You got:", totals, "questions correct out of", len(selected))
-    percentage = str(round(totals / len(selected) * 100)) + "%"
+    print("You got:", totals, "questions correct out of 20")
+    percentage = str(round(totals / 20 * 100)) + "%"
     print("That's a score of", percentage, "right")
+
+
+@create.command()
+def testskill():
+    """Tests a whole skill by taking a sample from different pages"""
+    if check_config() == False:
+        print("No DB configured")
+        return
+    db = connect()
+    selected_skill = skill_selector(db)
+    tests = []
+    cursor = db.pages.find({"skill": selected_skill})
+    for document in cursor:
+        if 'test' in document:
+            tests.extend(document['test'])
+    if len(tests) < 20:
+        print("Can't test you while the tests are less than 20")
+        print("Currently the skill has only", len(tests), "tests")
+        return
+    totals = 0
+    selected = random.sample(tests, 20)
+    for test in selected:
+        print()
+        print(test['question'], "\tCurrent Score:", totals)
+        dash = "-" * len(test['question'])
+        print(dash)
+        answers = test['answers']
+        for answer in answers:
+            print(str(answers.index(answer) + 1) + ") " + answer)
+        user_answer = int(input("Please enter the index of the right answer: ")) - 1
+
+        if user_answer == test['correct_index']:
+            totals += 1
+            print("Right answer, your points are: " + str(totals) + " points")
+        else:
+            print("Wrong answer, moving on")
+
+    # From here is about what to do with the test:
+    now = datetime.datetime.now()
+
+    # This uploads the results
+    results = db.skills.update(
+        {"title": selected_skill},
+        {"$push": {"scores": {"score": totals, "date": now}}}
+    )
+    print()
+    print("You got:", totals, "questions correct out of 20")
+    percentage = str(round(totals / 20 * 100)) + "%"
+    print("That's a score of", percentage, "right")
+    if totals <= 15:
+        level = "Learning"
+    else:
+        level = "Familiar"
+
+    mastery = db.skills.update(
+        {"title": selected_skill},
+        {"$set": {"mastery": level}}
+    )
+    print("Level updated to:", level)
 
 
 if __name__ == '__main__':
