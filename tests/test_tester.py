@@ -2,6 +2,13 @@ import unittest
 
 class TestCreatorMethods(unittest.TestCase):
 
+    # This is an integration test
+    def test_configure_db(self):
+        """On a first run of the program asks for the credentials of the DB to use
+        connects to it, tests the connection is possible and creates then deletes
+        a table to ensure it has reading/writting rights"""
+        pass
+
     def test_nothing(self):
         self.assertEqual(1,1)
 
@@ -20,12 +27,6 @@ class TestCreatorMethods(unittest.TestCase):
         finds the test in the mongodb and starts asking for questions until the user
         stops introducing more"""
         pass
-
-    # This is an integration test
-    def test_configure_db(self):
-        """On a first run of the program asks for the credentials of the DB to use
-        connects to it, tests the connection is possible and creates then deletes
-        a table to ensure it has reading/writting rights"""
 
     def test_question_added(self):
         """Test that introduced a question it is added correctly in the DB"""
