@@ -5,6 +5,8 @@ from pymongo import MongoClient
 import datetime
 import random
 import configparser
+import os
+from terminaltables import SingleTable
 
 
 # First lets create a click command to create one
@@ -21,6 +23,7 @@ def create():
 @click.option('--password', prompt="Password")
 def configdb(host_name, db_name, user_name, password):
     """Sets up the database to use"""
+    clear_screen()
     # Check if there is a valid config if not then go ahead, otherwise tell the user
     if check_config():
         print("There is already a configuration")
@@ -73,6 +76,7 @@ def connect():
 @create.command()
 def edittest():
     """Edits an already existing test or creates a new test"""
+    clear_screen()
     if check_config() == False:
         print("No DB configured")
         return
@@ -93,15 +97,25 @@ def edittest():
 
 
 def skill_selector(db):
+    clear_screen()
     print('Select a skill')
     # First show all the skills and select one
     cursor = db.skills.find()
     choice = []
     index = 1
+    data = []
+    data.append(["#", "Skill", "Last Tested", "Level"])
     for document in cursor:
         choice.append(document['title'])
-        print(str(index) + ")", document['title'])
+        if document.get('scores'):
+            last_date = document['scores'][-1]['date']
+            last_tested = '{:%d-%b-%Y}'.format(last_date)
+        else:
+            last_tested = "Never"
+        data.append([index, document['title'], last_tested, document['mastery']])
         index += 1
+    table = SingleTable(data)
+    print(table.table)
     user_answer = int(input("Please select a skill: ")) - 1
     selected_skill = choice[user_answer]
     return selected_skill
@@ -109,14 +123,23 @@ def skill_selector(db):
 
 def page_selector(selected_skill, db):
     # Show the pages of that skill and which one have a test already
+    clear_screen()
     cursor = db.pages.find({"skill": selected_skill})
     print("Has a test\t\tTitle")
     choice = []
     index = 1
+    data = []
+    data.append(["#", "Title", "Has Test?", "Questions"])
     for document in cursor:
         choice.append(document['title'])
-        print(str(index) + ")", 'test' in document, "\t", document["title"])
+        if document.get('test'):
+            questions = len(document['test'])
+        else:
+            questions = "None"
+        data.append([index,document["title"], "Yes" if 'test' in document else "No", questions])
         index += 1
+    table = SingleTable(data)
+    print(table.table)
     user_answer = int(input("Please select a skill: ")) - 1
     selected_page = choice[user_answer]
     return selected_page
@@ -125,6 +148,7 @@ def page_selector(selected_skill, db):
 def add_questions(selected_page, selected_skill, db):
     choice = "y"
     while choice == "y":
+        clear_screen()
         question = input("The question:")
         print("The question is:", question)
         print("You can introduce as many answers as you want, to stop type one spacebar then intro")
@@ -158,6 +182,7 @@ def add_questions(selected_page, selected_skill, db):
 @create.command()
 def testme():
     """Tests your knowledge of a page"""
+    clear_screen()
     if check_config() == False:
         print("No DB configured")
         return
@@ -181,13 +206,16 @@ def testme():
         return
     selected = random.sample(tests, 20)
     for test in selected:
-        print()
-        print(test['question'], "\tCurrent Score:", totals)
-        dash = "-" * len(test['question'])
-        print(dash)
+        clear_screen()
+        data = []
+        data.append(["#", test['question']])
         answers = test['answers']
         for answer in answers:
-            print(str(answers.index(answer) + 1) + ") " + answer)
+            data.append([answers.index(answer) + 1, answer])
+        data.append([totals, "Current Score",])
+        table = SingleTable(data)
+        table.inner_footing_row_border = True
+        print(table.table)
         user_answer = int(input("Please enter the index of the right answer: ")) - 1
 
         if user_answer == test['correct_index']:
@@ -204,15 +232,17 @@ def testme():
         {"skill": selected_skill, "title": selected_page},
         {"$push": {"scores": {"score": totals, "date": now}}}
     )
-    print()
+    clear_screen()
     print("You got:", totals, "questions correct out of 20")
     percentage = str(round(totals / 20 * 100)) + "%"
     print("That's a score of", percentage, "right")
+    print("Goodbye!")
 
 
 @create.command()
 def testskill():
     """Tests a whole skill by taking a sample from different pages"""
+    clear_screen()
     if check_config() == False:
         print("No DB configured")
         return
@@ -229,14 +259,18 @@ def testskill():
         return
     totals = 0
     selected = random.sample(tests, 20)
+
     for test in selected:
-        print()
-        print(test['question'], "\tCurrent Score:", totals)
-        dash = "-" * len(test['question'])
-        print(dash)
+        clear_screen()
+        data = []
+        data.append(["#", test['question']])
         answers = test['answers']
         for answer in answers:
-            print(str(answers.index(answer) + 1) + ") " + answer)
+            data.append([answers.index(answer) + 1, answer])
+        data.append([totals, "Current Score",])
+        table = SingleTable(data)
+        table.inner_footing_row_border = True
+        print(table.table)
         user_answer = int(input("Please enter the index of the right answer: ")) - 1
 
         if user_answer == test['correct_index']:
@@ -253,7 +287,7 @@ def testskill():
         {"title": selected_skill},
         {"$push": {"scores": {"score": totals, "date": now}}}
     )
-    print()
+    clear_screen()
     print("You got:", totals, "questions correct out of 20")
     percentage = str(round(totals / 20 * 100)) + "%"
     print("That's a score of", percentage, "right")
@@ -267,7 +301,10 @@ def testskill():
         {"$set": {"mastery": level}}
     )
     print("Level updated to:", level)
+    print("Goodbye!")
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 if __name__ == '__main__':
     create()
