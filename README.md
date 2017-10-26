@@ -12,13 +12,14 @@ Depending on the mark they get on the tests, the skill on the site is changed to
 - Test yourself in the content of a page. 
 - Test yourself about a full skill. 
 - Save scores of pages or skills. 
-- When saving scores of skills, change the status of the skill on the site. 
+- When saving scores of skills, change the status of the skill on the site.
+- Create pages directly from the tester for quick studying 
 
 ### Coming up features:
 - Reminders based on the [forgetting curve](https://en.wikipedia.org/wiki/Forgetting_curve)
 - Knowledge going automatically back to learning if after the reminder, the user doesn't test himself in a window of time of 48 hours
-- Delete questions
-- Delete tests
+- Delete questions (not a priority)
+- Delete tests (not a priority)
 - Voice controlled testing
 
 As you might imagine this is focused in productivity and retrieval.The more you retrieve the knowledge about a programming language or skill, the faster you become using it. The faster you are, the more than you can focus on **creativity** and having fun!
