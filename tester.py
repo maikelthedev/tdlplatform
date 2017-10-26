@@ -140,7 +140,7 @@ def page_selector(selected_skill, db):
         index += 1
     table = SingleTable(data)
     print(table.table)
-    user_answer = int(input("Please select a skill: ")) - 1
+    user_answer = int(input("Please select a page: ")) - 1
     selected_page = choice[user_answer]
     return selected_page
 
