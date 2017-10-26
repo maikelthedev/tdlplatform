@@ -125,7 +125,6 @@ def page_selector(selected_skill, db):
     # Show the pages of that skill and which one have a test already
     clear_screen()
     cursor = db.pages.find({"skill": selected_skill})
-    print("Has a test\t\tTitle")
     choice = []
     index = 1
     data = []
