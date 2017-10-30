@@ -7,6 +7,13 @@ import random
 import configparser
 import os
 from terminaltables import SingleTable
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+scope = ['https://spreadsheets.google.com/feeds']
+
+#Notice that you'll need to create the file with credentials for Google Drive API
+creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
+client = gspread.authorize(creds)
 
 
 # First lets create a click command to create one
@@ -94,6 +101,54 @@ def edittest():
     for document in cursor:
         ledocument = document
     print("This page has now:", len(ledocument['test']), "questions")
+
+
+@create.command()
+def createfromdrive():
+    """Updates an entire skill test base using data from a spreadsheet in G.Drive"""
+    clear_screen()
+    if check_config() == False:
+        print("No DB configured")
+        return
+    db = connect()
+    selected_skill = skill_selector(db)
+
+    # Select a G.Drive spreadsheet with the same name
+    file = client.open(selected_skill)
+
+    # Select each one of the sheets
+    for sheet in file.worksheets():
+        questions_and_answer = sheet.get_all_records()
+        # Get the page name
+        selected_page = sheet.title
+        # Delete test if existing
+        db.pages.update({"skill": selected_skill, "title": selected_page}, {"$unset": {"test": []}})
+        for single in questions_and_answer:
+            # Reformat to be what the DB needs.
+            answers = []
+            answers.append(single['Correct'])
+            # This gives up to 10 possible fake answers.
+            for index in range(1,10):
+                field = 'Fake' + str(index)
+                #import pdb; pdb.set_trace()
+                if single.get(field) and single[field] != "":
+                    answers.append(single[field])
+            question_and_answers = {
+                "question": single['Question'],
+                "answers": answers,
+                "correct_index": 0
+            }
+
+            # Update it
+            results = db.pages.update(
+                {"skill": selected_skill, "title": selected_page},
+                {"$push": {"test": question_and_answers}}
+            )
+
+    #Something might happen when you add a test for a page that doesn't exist. 
+
+    # Might want to be more informative in the future.
+    print("Tests imported successfully")
 
 
 def skill_selector(db):
