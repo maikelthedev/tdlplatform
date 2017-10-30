@@ -1,5 +1,5 @@
 # This creates new tests and stores them in a remote mongdodb.
-
+import time
 import click
 from pymongo import MongoClient
 import datetime
@@ -136,7 +136,6 @@ def createfromdrive():
             question_and_answers = {
                 "question": single['Question'],
                 "answers": answers,
-                "correct_index": 0
             }
 
             # Update it
@@ -145,7 +144,7 @@ def createfromdrive():
                 {"$push": {"test": question_and_answers}}
             )
 
-    #Something might happen when you add a test for a page that doesn't exist. 
+    #Something might happen when you add a test for a page that doesn't exist.
 
     # Might want to be more informative in the future.
     print("Tests imported successfully")
@@ -235,11 +234,9 @@ def add_questions(selected_page, selected_skill, db):
         for answer in answers:
             print(str(index + 1) + ")", answer)
             index += 1
-        correct_answer = int(input("Which one is the correct one: ")) - 1
         question_and_answers = {
             "question": question,
             "answers": answers,
-            "correct_index": correct_answer
         }
 
         results = db.pages.update(
@@ -280,19 +277,34 @@ def testme():
         data = []
         data.append(["#", test['question']])
         answers = test['answers']
-        for answer in answers:
-            data.append([answers.index(answer) + 1, answer])
+
+        unsorted = random.sample(answers, len(answers))
+        for answer in unsorted:
+            data.append([unsorted.index(answer) + 1, answer])
         data.append([totals, "Current Score",])
         table = SingleTable(data)
         table.inner_footing_row_border = True
         print(table.table)
-        user_answer = int(input("Please enter the index of the right answer: ")) - 1
+        # The correct one is always the first
+        correct = test['answers'][0]
+        try:
+            user_answer = int(input("Please enter the index of the right answer: ")) - 1
+        except (ValueError):
+            print("That's not a valid answer")
+            time.sleep(2)
+            continue
 
-        if user_answer == test['correct_index']:
-            totals += 1
-            print("Right answer, your points are: " + str(totals) + " points")
+        #Validate input
+        if int(user_answer) in range(len(test['answers'])):
+            if unsorted[user_answer] == correct:
+                totals += 1
+                print("Right answer, your points are: " + str(totals) + " points")
+            else:
+                print("Wrong answer, moving on")
         else:
-            print("Wrong answer, moving on")
+            print("That's not a valid answer")
+            time.sleep(2)
+            continue
 
     # From here is about what to do with the test:
     now = datetime.datetime.now()
@@ -335,19 +347,33 @@ def testskill():
         data = []
         data.append(["#", test['question']])
         answers = test['answers']
-        for answer in answers:
-            data.append([answers.index(answer) + 1, answer])
+        unsorted = random.sample(answers, len(answers))
+        for answer in unsorted:
+            data.append([unsorted.index(answer) + 1, answer])
         data.append([totals, "Current Score",])
         table = SingleTable(data)
         table.inner_footing_row_border = True
         print(table.table)
-        user_answer = int(input("Please enter the index of the right answer: ")) - 1
+        # The correct one is always the first
+        correct = test['answers'][0]
+        try:
+            user_answer = int(input("Please enter the index of the right answer: ")) - 1
+        except (ValueError):
+            print("That's not a valid answer")
+            time.sleep(2)
+            continue
 
-        if user_answer == test['correct_index']:
-            totals += 1
-            print("Right answer, your points are: " + str(totals) + " points")
+        #Validate input
+        if int(user_answer) in range(len(test['answers'])):
+            if unsorted[user_answer] == correct:
+                totals += 1
+                print("Right answer, your points are: " + str(totals) + " points")
+            else:
+                print("Wrong answer, moving on")
         else:
-            print("Wrong answer, moving on")
+            print("That's not a valid answer")
+            time.sleep(2)
+            continue
 
     # From here is about what to do with the test:
     now = datetime.datetime.now()
