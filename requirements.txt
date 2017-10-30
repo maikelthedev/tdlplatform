@@ -1,6 +1,17 @@
+certifi==2017.7.27.1
+chardet==3.0.4
 click==6.7
+gspread==0.6.2
+httplib2==0.10.3
+idna==2.6
 nose2==0.6.5
+oauth2client==4.1.2
+pyasn1==0.3.7
+pyasn1-modules==0.1.5
 pymongo==3.5.1
+requests==2.18.4
+rsa==3.4.2
 six==1.11.0
 terminaltables==3.1.0
--e git+git@github.com:maikeldotuk/tdlplatform.git@922078e096d3690c83b26c077578e187e033d3f8#egg=tester
+-e git+git@github.com:maikeldotuk/tdlplatform.git@96f431cdf3678688c675e9e2dc6fcfed284891c6#egg=tester
+urllib3==1.22
