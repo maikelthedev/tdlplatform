@@ -10,7 +10,7 @@ pyasn1==0.3.7
 pyasn1-modules==0.1.5
 pymongo==3.5.1
 requests==2.18.4
-rsa==3.4.2
+rsa==4.7
 six==1.11.0
 terminaltables==3.1.0
 -e git+git@github.com:maikeldotuk/tdlplatform.git@96f431cdf3678688c675e9e2dc6fcfed284891c6#egg=tester
