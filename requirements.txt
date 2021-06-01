@@ -14,4 +14,4 @@ rsa==3.4.2
 six==1.11.0
 terminaltables==3.1.0
 -e git+git@github.com:maikeldotuk/tdlplatform.git@96f431cdf3678688c675e9e2dc6fcfed284891c6#egg=tester
-urllib3==1.22
+urllib3==1.26.5
